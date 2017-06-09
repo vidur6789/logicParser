@@ -1,0 +1,167 @@
+/*
+  * Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved.
+ */
+
+package com.ofss.fc.enumeration.commonservice;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
+/**
+ * 
+ * @author aye.phyu.phyu.aung
+ */
+@XmlType(namespace = "http://commonservice.enumeration.fc.ofss.com")
+@XmlRootElement()
+public enum QuestionnaireOperatorType implements IOperatorGrammar{
+	OR("OR", 1, 0, 2, set("or")),
+	AND("AND", 2, 0, 2, set("and")),
+	NOT("NOT", 3, 0 , 1, set("!")),
+	EQUAL("EQUAL", 4, 0, 2, set("=", "is")),
+	NOT_EQUAL("NOT_EQUAL", 4, 0, 2, set("!=")),
+	GREATER("GREATER", 4, 0, 2, set(">")),
+	GREATER_EQUAL("GREATER_EQUAL", 4, 0, 2, set(">=")),
+	LESS("LESS", 4, 0, 2, set("<")),
+	LESS_EQUAL("LESS_EQUAL", 4, 0, 2, set("<=")),
+	ADD("ADD", 5, 0, 2, set("+")), 
+	SUBTRACT("SUBTRACT" , 5, 0, 2, set("-")), 
+	MULTIPLY("MULTIPLY", 6, 0, 2, set("*")), 
+	DIVIDE("DIVIDE", 6, 0, 2, set("/")),
+	CONTAINS("CONTAINS", 7, 0, 2, set("contains")),
+	NOT_CONTAINS("NOT_CONTAINS", 7, 0, 2, true, set("not contains")),
+	CONTAINS_ONLY("CONTAINS_ONLY", 7, 0, 2, true, set("contains only")),//TODO Remove if not used
+	BETWEEN("BETWEEN", 7, 0, 3, set("between")),
+	IN("IN", 7, 0, 2, true, set("in")),
+	NOT_IN("NOT_IN", 7, 0, 2, true, set("not in"));
+	
+	
+	public static final int LEFT_ASSOCIATIVE = 0;
+	public static final int RIGHT_ASSOCIATIVE = 1;
+	
+	private String value;
+	private int precedence;
+	private int arity;
+	private boolean variableArity;
+	private int associative;
+	private int order;
+	private Set<String> symbols;
+
+	private QuestionnaireOperatorType(String value) {
+
+		this.value = value;
+	}
+	
+	private QuestionnaireOperatorType(String value, int precedence, int associative, int arity, Set<String> symbols) {
+
+		this.value = value;
+		this.precedence = precedence;
+		this.associative = associative;
+		this.symbols = symbols;
+		this.arity = arity;
+		this.variableArity=false;
+	}
+	
+	private QuestionnaireOperatorType(String value, int precedence, int associative, int arity, boolean variableArity, Set<String> symbols) {
+
+		this.value = value;
+		this.precedence = precedence;
+		this.associative = associative;
+		this.symbols = symbols;
+		this.arity = arity;
+		this.variableArity=variableArity;
+	}
+
+	/**
+	 * @return the value
+	 */
+	public String getValue() {
+		return value;
+	}
+	
+	
+	/**
+	 * @return the precedence
+	 */
+	public int getPrecedence() {
+		return precedence;
+	}
+
+	/**
+	 * @return the arity
+	 */
+	public int getArity() {
+		return arity;
+	}
+	
+
+	/**
+	 * @return the variableArity
+	 */
+	public boolean isVariableArity() {
+		return variableArity;
+	}
+
+	/**
+	 * @return the associative
+	 */
+	public int getAssociative() {
+		return associative;
+	}
+	
+	/**
+	 * @return the symbols
+	 */
+	public Set<String> getSymbols() {
+		return symbols;
+	}
+
+	private static Set<String> set(String...symbols){
+		return Arrays.stream(symbols).collect(Collectors.toCollection(HashSet::new));
+	}
+
+	public static QuestionnaireOperatorType fromValue(String str) {
+
+		for (QuestionnaireOperatorType element : QuestionnaireOperatorType.values()) {
+			if (element.toString().equals(str)) {
+				return element;
+			}
+		}
+		return null;
+	}
+	
+	
+	public static QuestionnaireOperatorType fromSymbol(String str) {
+
+		for (QuestionnaireOperatorType element : QuestionnaireOperatorType.values()) {
+			if (element.getSymbols().contains(str)) {
+				return element;
+			}
+		}
+		return null;
+	}
+	
+	public String toString(){
+		return value;
+	}
+	
+	public boolean isLeftAssociative(){
+		return LEFT_ASSOCIATIVE == associative;
+	}
+	
+	public int preceeds(IOperatorGrammar operator){
+		return operator!=null ? precedence - operator.getPrecedence(): 100;
+	}
+
+	public Set<AnswerValueType> getTypes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+}
+
